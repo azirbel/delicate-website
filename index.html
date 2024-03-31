@@ -20,13 +20,18 @@
       color: #eee;
       height: 80px;
       width: 140px;
-      cursor: move;
       user-select: none;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: "Amatic SC";
       text-shadow: 2px 2px 3px #38e;
+    }
+
+    .world-object {
+      cursor: grab;
+      user-select: none;
+      /* border: 1px solid green; */
     }
 
     #ground {
@@ -57,9 +62,9 @@
       "
     ></div>
     <div style="position: relative; margin: 20px; z-index: 2; color: white">
-      <h1>Hello</h1>
+      <h1 id="header">Hello</h1>
       <p id="world">World</p>
-      <div id="box">
+      <div id="box" class="world-object">
         <h1>hello world</h1>
       </div>
       <div id="ground"></div>
@@ -111,7 +116,7 @@
     //   render.canvas.height = window.innerHeight
     // })
 
-    const bodies = []
+    const worldObjects = []
 
     const engine = Matter.Engine.create()
     const box = {
@@ -126,22 +131,13 @@
         this.elem.style.transform = `rotate(${this.body.angle}rad)`
       },
     }
-    bodies.push(box)
+    worldObjects.push(box)
     const ground = Matter.Bodies.rectangle(200, 200, 400, 120, {
       isStatic: true,
     })
     const mouseConstraint = Matter.MouseConstraint.create(engine, {
       element: document.body,
     })
-    Matter.Composite.add(engine.world, [box.body, ground, mouseConstraint])
-
-    function rerender() {
-      bodies.forEach((body) => body.render())
-      Matter.Engine.update(engine)
-      requestAnimationFrame(rerender)
-    }
-
-    rerender()
 
     // Take an input element, and wrap each of its letter in a span
     function decomposeToSpans(el) {
@@ -163,13 +159,51 @@
       clone.style.top = `${rect.top}px`
       clone.style.left = `${rect.left}px`
       clone.style.zIndex = 3
+      clone.classList.add("world-object")
       el.style.opacity = 0.5
-      document.body.appendChild(clone)
+      el.parentElement.appendChild(clone)
+
+      const worldObject = {
+        w: rect.width,
+        h: rect.height,
+        body: Matter.Bodies.rectangle(
+          rect.left,
+          rect.top,
+          rect.width,
+          rect.height
+        ),
+        elem: clone,
+        render() {
+          const { x, y } = this.body.position
+          this.elem.style.top = `${y - this.h / 2}px`
+          this.elem.style.left = `${x - this.w / 2}px`
+          this.elem.style.transform = `rotate(${this.body.angle}rad)`
+        },
+      }
+
+      worldObjects.push(worldObject)
     }
 
-    const spans = decomposeToSpans(document.querySelector("#world"))
-    spans.forEach((span) => {
+    decomposeToSpans(document.querySelector("#world")).forEach((span) => {
       makeBody(span)
     })
+
+    decomposeToSpans(document.querySelector("#header")).forEach((span) => {
+      makeBody(span)
+    })
+
+    Matter.Composite.add(engine.world, [
+      ...worldObjects.map((o) => o.body),
+      ground,
+      mouseConstraint,
+    ])
+
+    function rerender() {
+      worldObjects.forEach((body) => body.render())
+      Matter.Engine.update(engine)
+      requestAnimationFrame(rerender)
+    }
+
+    rerender()
   </script>
 </html>
