@@ -28,6 +28,10 @@
       text-shadow: 2px 2px 3px #38e;
     }
 
+    #world {
+      max-width: 400px;
+    }
+
     .world-object {
       cursor: grab;
       user-select: none;
@@ -53,8 +57,11 @@
       "
     ></div>
     <div style="position: relative; margin: 20px; z-index: 2; color: white">
-      <h1 id="header">Hello</h1>
-      <p id="world">World</p>
+      <h1 id="header">Hello visitor</h1>
+      <p id="world">
+        I've just started putting the text on this website together. I didn't do
+        a very good job and I'm not sure it'll stay put. Please don't touch it!
+      </p>
     </div>
     <div
       id="trigger"
@@ -105,7 +112,7 @@
       const rect = el.getBoundingClientRect()
       const clone = el.cloneNode(true)
       clone.style.position = "absolute"
-      clone.style.color = "red"
+      clone.style.color = "#333"
       clone.style.top = `${rect.top}px`
       clone.style.left = `${rect.left}px`
       clone.style.zIndex = 3
